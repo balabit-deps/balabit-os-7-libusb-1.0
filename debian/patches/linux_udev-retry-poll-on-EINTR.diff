@@ -1,0 +1,40 @@
+From 0a02d1212bfb7ff2e9f3fc603655b0220b7d6889 Mon Sep 17 00:00:00 2001
+From: Romain Vimont <rom@rom1v.com>
+Date: Tue, 11 Oct 2016 21:51:31 +0200
+Subject: [PATCH] linux_udev: Retry poll() on EINTR
+
+The poll() syscall may temporarily fail when it is interrupted by a
+signal; -1 is returned and errno is set to EINTR.
+
+When this occurred, the udev event thread exited.
+
+Instead, since this is a temporary failure, just try the call again.
+<https://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html>
+
+Signed-off-by: Romain Vimont <rom@rom1v.com>
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ libusb/os/linux_udev.c | 6 +++++-
+ libusb/version_nano.h  | 2 +-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/libusb/os/linux_udev.c b/libusb/os/linux_udev.c
+index ea27142..61d953d 100644
+--- a/libusb/os/linux_udev.c
++++ b/libusb/os/linux_udev.c
+@@ -172,7 +172,11 @@ static void *linux_udev_event_thread_main(void *arg)
+ 
+ 	usbi_dbg("udev event thread entering.");
+ 
+-	while (poll(fds, 2, -1) >= 0) {
++	while ((r = poll(fds, 2, -1)) >= 0 || errno == EINTR) {
++		if (r < 0) {
++			/* temporary failure */
++			continue;
++		}
+ 		if (fds[0].revents & POLLIN) {
+ 			/* activity on control pipe, read the byte and exit */
+ 			r = usbi_read(udev_control_pipe[0], &dummy, sizeof(dummy));
+-- 
+2.11.0
+

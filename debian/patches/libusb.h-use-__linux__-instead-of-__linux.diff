@@ -1,0 +1,32 @@
+From e59e437a1fed20c2e363154b6e9639b88f549bd7 Mon Sep 17 00:00:00 2001
+From: Adrian Bunk <bunk@debian.org>
+Date: Sun, 18 Jun 2017 22:45:54 +0200
+Subject: [PATCH] libusb.h: use __linux__ instead of __linux
+
+The check was added since sys/time.h is not available on Windows,
+but breaks on PowerPC where __linux is not defined by GCC in strict
+standards modes.
+
+Signed-off-by: Adrian Bunk <bunk@debian.org>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+---
+ libusb/libusb.h       | 2 +-
+ libusb/version_nano.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libusb/libusb.h b/libusb/libusb.h
+index c562690..f0f6d71 100644
+--- a/libusb/libusb.h
++++ b/libusb/libusb.h
+@@ -54,7 +54,7 @@ typedef unsigned __int32  uint32_t;
+ #include <sys/types.h>
+ #endif
+ 
+-#if defined(__linux) || defined(__APPLE__) || defined(__CYGWIN__) || defined(__HAIKU__)
++#if defined(__linux__) || defined(__APPLE__) || defined(__CYGWIN__) || defined(__HAIKU__)
+ #include <sys/time.h>
+ #endif
+ 
+-- 
+2.11.0
+

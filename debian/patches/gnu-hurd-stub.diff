@@ -1,0 +1,308 @@
+Description: Implement stub backend for Hurd
+Author: Petter Reinholdtsen <pere@hungry.com>
+
+--- a/libusb/core.c
++++ b/libusb/core.c
+@@ -48,6 +48,8 @@
+ const struct usbi_os_backend * const usbi_backend = &linux_usbfs_backend;
+ #elif defined(OS_DARWIN)
+ const struct usbi_os_backend * const usbi_backend = &darwin_backend;
++#elif defined(OS_HURD)
++const struct usbi_os_backend * const usbi_backend = &hurd_backend;
+ #elif defined(OS_OPENBSD)
+ const struct usbi_os_backend * const usbi_backend = &openbsd_backend;
+ #elif defined(OS_NETBSD)
+--- a/libusb/libusbi.h
++++ b/libusb/libusbi.h
+@@ -533,7 +533,7 @@
+ 
+ /* Internal abstraction for poll (needs struct usbi_transfer on Windows) */
+ #if defined(OS_LINUX) || defined(OS_DARWIN) || defined(OS_OPENBSD) || defined(OS_NETBSD) ||\
+-	defined(OS_HAIKU) || defined(OS_SUNOS)
++	defined(OS_HAIKU) || defined(OS_SUNOS) || defined(OS_HURD)
+ #include <unistd.h>
+ #include "os/poll_posix.h"
+ #elif defined(OS_WINDOWS) || defined(OS_WINCE)
+@@ -1136,6 +1136,7 @@
+ 
+ extern const struct usbi_os_backend linux_usbfs_backend;
+ extern const struct usbi_os_backend darwin_backend;
++extern const struct usbi_os_backend hurd_backend;
+ extern const struct usbi_os_backend openbsd_backend;
+ extern const struct usbi_os_backend netbsd_backend;
+ extern const struct usbi_os_backend windows_backend;
+--- /dev/null
++++ b/libusb/os/hurd_usb.c
+@@ -0,0 +1,214 @@
++/*
++ * Copyright © 2016 Petter Reinholdtsen <pere@hungry.com>
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++/*
++ * Stup libusb implementation for GNU Hurd returning empty list of
++ * devices.  This allow programs to build on Hurd without USB support
++ * without having to update a lot of build dependencies.
++ */
++
++#include "libusbi.h"
++
++static int
++hurd_init(struct libusb_context *ctx)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_get_device_list(struct libusb_context * ctx,
++	struct discovered_devs **discdevs)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_open(struct libusb_device_handle *handle)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static void
++hurd_close(struct libusb_device_handle *handle)
++{
++	usbi_dbg(__FUNCTION__);
++}
++
++static int
++hurd_get_device_descriptor(struct libusb_device *dev, unsigned char *buf,
++    int *host_endian)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++int
++hurd_get_active_config_descriptor(struct libusb_device *dev,
++    unsigned char *buf, size_t len, int *host_endian)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++int
++hurd_get_config_descriptor(struct libusb_device *dev, uint8_t idx,
++    unsigned char *buf, size_t len, int *host_endian)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_get_configuration(struct libusb_device_handle *handle, int *config)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_set_configuration(struct libusb_device_handle *handle, int config)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_claim_interface(struct libusb_device_handle *handle, int iface)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_release_interface(struct libusb_device_handle *handle, int iface)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_set_interface_altsetting(struct libusb_device_handle *handle, int iface,
++    int altsetting)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_clear_halt(struct libusb_device_handle *handle, unsigned char endpoint)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_reset_device(struct libusb_device_handle *handle)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_alloc_streams(struct libusb_device_handle *handle,
++		   uint32_t num_streams, unsigned char *endpoints, int num_endpoints)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static int
++hurd_free_streams(struct libusb_device_handle *handle,
++		  unsigned char *endpoints, int num_endpoints)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++static void
++hurd_destroy_device(struct libusb_device *dev)
++{
++	usbi_dbg(__FUNCTION__);
++}
++
++static int
++hurd_submit_transfer(struct usbi_transfer *itransfer)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++int
++hurd_cancel_transfer(struct usbi_transfer *itransfer)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++void
++hurd_clear_transfer_priv(struct usbi_transfer *itransfer)
++{
++	usbi_dbg(__FUNCTION__);
++}
++
++int
++hurd_handle_transfer_completion(struct usbi_transfer *itransfer)
++{
++	usbi_dbg(__FUNCTION__);
++	return (LIBUSB_ERROR_NOT_SUPPORTED);
++}
++
++int
++hurd_clock_gettime(int clkid, struct timespec *tp)
++{
++	usbi_dbg("clock %d", clkid);
++
++	if (clkid == USBI_CLOCK_REALTIME)
++		return clock_gettime(CLOCK_REALTIME, tp);
++
++	if (clkid == USBI_CLOCK_MONOTONIC)
++		return clock_gettime(CLOCK_MONOTONIC, tp);
++
++	return (LIBUSB_ERROR_INVALID_PARAM);
++}
++
++const struct usbi_os_backend hurd_backend = {
++	.name = "Synchronous Hurd backend",
++	.caps = 0,
++	.init = hurd_init,
++	.get_device_list = hurd_get_device_list,
++	.open = hurd_open,
++	.close = hurd_close,
++	.get_device_descriptor = hurd_get_device_descriptor,
++	.get_active_config_descriptor = hurd_get_active_config_descriptor,
++	.get_config_descriptor = hurd_get_config_descriptor,
++	.set_configuration = hurd_set_configuration,
++	.claim_interface = hurd_claim_interface,
++	.release_interface = hurd_release_interface,
++	.set_interface_altsetting = hurd_set_interface_altsetting,
++	.clear_halt = hurd_clear_halt,
++	.reset_device = hurd_reset_device,
++	.alloc_streams = hurd_alloc_streams,
++	.free_streams = hurd_free_streams,
++	.submit_transfer = hurd_submit_transfer,
++	.cancel_transfer = hurd_cancel_transfer,
++	.clear_transfer_priv = hurd_clear_transfer_priv,
++	.clock_gettime = hurd_clock_gettime,
++};
+--- a/configure.ac
++++ b/configure.ac
+@@ -67,6 +67,11 @@
+ 	backend="darwin"
+ 	threads="posix"
+ 	;;
++*-gnu*)
++	AC_MSG_RESULT([Hurd])
++	backend="hurd"
++	threads="posix"
++	;;
+ *-openbsd*)
+ 	AC_MSG_RESULT([OpenBSD])
+ 	backend="openbsd"
+@@ -151,6 +156,14 @@
+ 		[AC_DEFINE([POLL_NFDS_TYPE],[unsigned int],[type of second poll() argument])],
+ 		[#include <poll.h>])
+ 	;;
++hurd)
++	AC_DEFINE(OS_HURD, 1, [Hurd backend])
++	AC_SUBST(OS_HURD)
++	THREAD_CFLAGS="-pthread"
++	LIBS="-pthread"
++	AC_CHECK_HEADERS([poll.h])
++	AC_DEFINE([POLL_NFDS_TYPE],[nfds_t],[type of second poll() argument])
++	;;
+ openbsd)
+ 	AC_DEFINE(OS_OPENBSD, 1, [OpenBSD backend])
+ 	AC_SUBST(OS_OPENBSD)
+@@ -204,6 +217,7 @@
+ 
+ AM_CONDITIONAL(OS_LINUX, test "x$backend" = xlinux)
+ AM_CONDITIONAL(OS_DARWIN, test "x$backend" = xdarwin)
++AM_CONDITIONAL(OS_HURD, test "x$backend" = xhurd)
+ AM_CONDITIONAL(OS_OPENBSD, test "x$backend" = xopenbsd)
+ AM_CONDITIONAL(OS_SUNOS, test "x$backend" = xsunos)
+ AM_CONDITIONAL(OS_NETBSD, test "x$backend" = xnetbsd)
+--- a/libusb/Makefile.am
++++ b/libusb/Makefile.am
+@@ -20,6 +20,7 @@
+ WINCE_USB_SRC = os/wince_usb.h os/wince_usb.c
+ HAIKU_USB_SRC = os/haiku_usb.h os/haiku_usb_backend.cpp \
+ 		os/haiku_usb_raw.h os/haiku_usb_raw.cpp os/haiku_pollfs.cpp
++HURD_USB_SRC = os/hurd_usb.c
+ 
+ EXTRA_DIST = $(POSIX_POLL_SRC) $(POSIX_THREADS_SRC) \
+ 	$(WINDOWS_POLL_SRC) $(WINDOWS_THREADS_SRC) \
+@@ -62,6 +63,10 @@
+ libusb_1_0_la_LIBADD = libusb_haiku.la
+ endif
+ 
++if OS_HURD
++OS_SRC = $(HURD_USB_SRC)
++endif
++
+ if OS_WINDOWS
+ 
+ if USE_USBDK

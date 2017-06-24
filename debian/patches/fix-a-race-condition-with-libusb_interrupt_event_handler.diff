@@ -1,0 +1,53 @@
+From a90331a3be0a7919dfd256d700c38cfad5718575 Mon Sep 17 00:00:00 2001
+From: Lars Kanis <lars@greiz-reinsdorf.de>
+Date: Sun, 27 Nov 2016 17:41:01 +0100
+Subject: [PATCH] Fix a race condition with
+ libusb_interrupt_event_handler().
+
+USBI_EVENT_USER_INTERRUPT isn't set in case of another pending event. When
+libusb_interrupt_event_handler() is called and USBI_EVENT_POLLFDS_MODIFIED is
+already set, but libusb_handle_events() isn't currently active waiting in
+poll(), the interrupt request will be cleared before poll() is called. poll()
+therefore blocks and the event handler doesn't return.
+
+This is especially the case, when libusb_interrupt_event_handler() is called
+before the first call to libusb_handle_events(). In this case
+libusb_handle_events() blocks instead of returning immediately.
+
+This patch fixes the race condition by setting the event flag the same way a
+usbi_fd_notification().
+
+Signed-off-by: Lars Kanis <lars@greiz-reinsdorf.de>
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ libusb/io.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/libusb/io.c b/libusb/io.c
+index bf2b5fa..0026ba7 100644
+--- a/libusb/io.c
++++ b/libusb/io.c
+@@ -1887,14 +1887,17 @@ int API_EXPORTED libusb_event_handler_active(libusb_context *ctx)
+  */
+ void API_EXPORTED libusb_interrupt_event_handler(libusb_context *ctx)
+ {
++	int pending_events;
+ 	USBI_GET_CONTEXT(ctx);
+ 
+ 	usbi_dbg("");
+ 	usbi_mutex_lock(&ctx->event_data_lock);
+-	if (!usbi_pending_events(ctx)) {
+-		ctx->event_flags |= USBI_EVENT_USER_INTERRUPT;
++
++	pending_events = usbi_pending_events(ctx);
++	ctx->event_flags |= USBI_EVENT_USER_INTERRUPT;
++	if (!pending_events)
+ 		usbi_signal_event(ctx);
+-	}
++
+ 	usbi_mutex_unlock(&ctx->event_data_lock);
+ }
+ 
+-- 
+2.11.0
+

@@ -1,0 +1,4 @@
+gnu-hurd-stub.diff
+fix-a-race-condition-with-libusb_interrupt_event_handler.diff
+libusb.h-use-__linux__-instead-of-__linux.diff
+linux_udev-retry-poll-on-EINTR.diff
